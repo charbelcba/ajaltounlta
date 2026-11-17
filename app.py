@@ -3,14 +3,15 @@ import streamlit as st
 import pandas as pd
 
 DB_PATH = "ajaltoun.sqlite"
-col1,col2,col3 = st.columns([1,1,1])
-with col2:
+col1,col2 = st.columns(2)
+with col1:
      st.image("ajaltoun.png",caption="TEL:09 236075",width=100)
+     #st.title("AJALTOUN STUDENT NAME",width="stretch")
      #st.image("ajaltoun.png",caption="Ecole Technique Ajaltoun TEL:09 236075",width=150)
+with col2:
+    st.title("AJALTOUN STUDENT NAME",width="stretch")
 
-st.title("AJALTOUN STUDENT NAME")
-
-search = st.text_input("Search STUDENT NAME")
+search = st.text_input("SEARCH")
 
 conn = sqlite3.connect(DB_PATH)
 if search:
