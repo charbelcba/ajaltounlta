@@ -26,7 +26,7 @@ page = st.navigation(
          st.Page("hello.py", title="WELCOME TO AJALTOUN LTA" ),
         #st.Page("C:/python/ajaltoun/hello.py", title="Hello", icon="👋"),
         #st.Page("C:/python/ajaltoun/hello.py", title="Hello", icon="ajaltoun.png"),
-        st.Page("app1.py", title="Ajaltoun Student", icon="📈"),
+        st.Page("app2.py", title="Ajaltoun Student", icon="📈"),
         #st.Page("C:/python/ajaltoun/mapping_demo.py", title="EXAM", icon="🌍"),
         #st.Page("C:/python/ajaltoun/dataframe_demo.py", title="DataFrame", icon="📊"),
     ]
