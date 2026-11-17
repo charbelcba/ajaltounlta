@@ -1,30 +1,34 @@
-import sqlite3
 import streamlit as st
 import pandas as pd
 
-DB_PATH = "ajaltoun.sqlite"
-col1,col2 = st.columns(2)
-with col1:
-     st.image("ajaltoun.png",caption="TEL:09 236075",width=100)
-     #st.title("AJALTOUN STUDENT NAME",width="stretch")
-     #st.image("ajaltoun.png",caption="Ecole Technique Ajaltoun TEL:09 236075",width=150)
-with col2:
-    st.title("AJALTOUN STUDENT NAME",width="stretch")
+# --- 1. Iza ba3edna ma fetna, farji l box ---
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
 
-search = st.text_input("SEARCH")
+if not st.session_state.logged_in:
+    password = st.text_input("PASSWORD", type="password")
 
-conn = sqlite3.connect(DB_PATH)
-if search:
-    df = pd.read_sql("""
-        SELECT NAME, PHONE, PARENT_PH as PARENT_PHONE,CLASS,ADDRESS
-        FROM ajaltoun
-        WHERE CAST(NAME AS TEXT) LIKE ? OR CAST(CLASS AS TEXT) LIKE ?
-    """, conn, params=(f"%{search}%", f"%{search}%"))
-else:
-    df = pd.read_sql("""
-        SELECT NAME, PHONE, PARENT_PH as PARENT_PHONE,CLASS,ADDRESS
-        FROM ajaltoun
-    """, conn)
-conn.close()
-st.caption(f"Showing {len(df)} rows")
-st.dataframe(df, use_container_width=True)
+    if password == "Ajaltoun@1234":
+        st.session_state.logged_in = True
+        st.rerun()
+
+    elif password != "":
+        st.error("Wrong Password !")
+
+    st.stop()  # Wa2af hon, ma tfarji shi tene
+
+# --- 2. Iza fetna, kammel l app hon, MA FI BOX BA2A ---
+#st.success("Welcome to Ajaltoun LTA 👋")
+# ... hon btebda l logo, l QR, l search, kello
+
+page = st.navigation(
+    [
+         st.Page("hello.py", title="WELCOME TO AJALTOUN LTA" ),
+        #st.Page("C:/python/ajaltoun/hello.py", title="Hello", icon="👋"),
+        #st.Page("C:/python/ajaltoun/hello.py", title="Hello", icon="ajaltoun.png"),
+        st.Page("app1.py", title="Ajaltoun Student", icon="📈"),
+        #st.Page("C:/python/ajaltoun/mapping_demo.py", title="EXAM", icon="🌍"),
+        #st.Page("C:/python/ajaltoun/dataframe_demo.py", title="DataFrame", icon="📊"),
+    ]
+)
+page.run()
