@@ -6,6 +6,9 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
+    col1,col2,col3 = st.columns(3)
+    with col2:
+        st.image("ajaltoun.png",caption="TEL:09 236075",width=225)
     password = st.text_input("PASSWORD", type="password")
 
     if password == "Ajaltoun@1234":
