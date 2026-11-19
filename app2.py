@@ -17,13 +17,13 @@ conn = sqlite3.connect(DB_PATH)
 if search:
     df = pd.read_sql("""
         SELECT NAME, PHONE, PARENT_PH as PARENT_PHONE,CLASS,ADDRESS
-        FROM ajaltoun
+        FROM student
         WHERE CAST(NAME AS TEXT) LIKE ? OR CAST(CLASS AS TEXT) LIKE ?
     """, conn, params=(f"%{search}%", f"%{search}%"))
 else:
     df = pd.read_sql("""
         SELECT NAME, PHONE, PARENT_PH as PARENT_PHONE,CLASS,ADDRESS
-        FROM ajaltoun
+        FROM student
     """, conn)
 conn.close()
 st.caption(f"Showing {len(df)} rows")
