@@ -11,8 +11,15 @@ conn = sqlite3.connect("ajaltoun.sqlite", check_same_thread=False)
 conn.execute("""CREATE TABLE IF NOT EXISTS attendance (
   date TEXT, num TEXT, nom TEXT, class TEXT, period TEXT, status TEXT
 )""")
+conn.commit()
 
-# --- 1. ENTA BTNA22E BAS DATE + CLASS ---
+# --- HAYDA L SERRR: VERSION COUNTER ---
+# Kell ma tekbos New / Delete, mnzid l ra2em, w Streamlit byensa kell l 2adim
+if 'reset_counter' not in st.session_state:
+    st.session_state['reset_counter'] = 0
+VER = st.session_state['reset_counter']
+
+# --- 1. DATE + CLASS ---
 c1, c2 = st.columns(2)
 with c1:
     d = st.date_input("Date / التاريخ", date.today())
@@ -20,68 +27,73 @@ with c2:
     classes = pd.read_sql("SELECT DISTINCT CLASS FROM student ORDER BY CLASS", conn)['CLASS'].tolist()
     selected_class = st.selectbox("Class / الصف", classes)
 
-# Chouf iza mawjoud abl walla la2
 exists = pd.read_sql(f"SELECT * FROM attendance WHERE date='{d}' AND class='{selected_class}'", conn)
 if not exists.empty:
-    st.info(f"⚠️ هيدا اليوم موجود قبل - عم تعمل Modify - عدّل و اعمل Save")
+    st.info("⚠️ هيدا اليوم موجود قبل - عم تعمل Modify")
 else:
-    st.success(f"✨ يوم جديد - عم تعمل New - حط الحضور و اعمل Save")
+    st.success("✨ يوم جديد - عم تعمل New")
 
-# --- 2. L KABSET ---
+# --- 2. KABSET ---
 b1, b2, b3 = st.columns(3)
 with b1:
-    new_clicked = st.button("➕ New / جديد", use_container_width=True)
+    if st.button("➕ New / جديد", use_container_width=True):
+        conn.execute("DELETE FROM attendance WHERE date=? AND class=?", (str(d), selected_class))
+        conn.commit()
+        st.session_state['reset_counter'] += 1
+        st.rerun()
 with b2:
     save_clicked = st.button("💾 Save / حفظ", type="primary", use_container_width=True)
 with b3:
-    delete_clicked = st.button("🗑️ Delete / حذف", use_container_width=True)
+    if st.button("🗑️ Delete / حذف", use_container_width=True):
+        conn.execute("DELETE FROM attendance WHERE date=? AND class=?", (str(d), selected_class))
+        conn.commit()
+        st.session_state['reset_counter'] += 1
+        st.success("Enmaha! - Deleted! - Raja3 kello حاضر")
+        st.rerun()
 
-if delete_clicked:
-    conn.execute("DELETE FROM attendance WHERE date=? AND class=?", (str(d), selected_class))
-    conn.commit()
-    st.warning("Enmaha! - Deleted! 3mol New la terja3 tkhle2a")
-    st.rerun()
-
-if new_clicked:
-    # New = iza mawjoud, ma byem7e, bas byefarjiik yeha la t3addel
-    # Iza baddak New ndif 100%, 3mol Delete abl
-    st.rerun()
-
-# --- 3. L JADWAL - BYEKBOLAK KELLO DEGHRE ---
+# --- 3. L JADWAL ---
 students = pd.read_sql(f"SELECT NUM, NAME FROM student WHERE CLASS='{selected_class}' ORDER BY NAME", conn)
 st.write(f"الصف: **{selected_class}** | عدد التلاميذ: **{len(students)}** | {d}")
 
-h = st.columns([0.5, 1.5] + [0.8]*8 + [1.5])
-h[0].write("**Num**"); h[1].write("**اسم الطالب**")
-for i in range(8): h[2+i].write(f"**الحصة {i+1}**")
-h[10].write("**التبرير**")
+h = st.columns([0.6, 1.8, 1.2, 1.2, 1.8])
+h[0].write("**Num**"); h[1].write("**اسم الطالب**"); h[2].write("**الحضور / الغياب**"); h[3].write("**برر؟**"); h[4].write("**شو التبرير؟**")
+
+all_to_save = []
 
 for _, row in students.iterrows():
-    cols = st.columns([0.5, 1.5] + [0.8]*8 + [1.5])
+    cols = st.columns([0.6, 1.8, 1.2, 1.2, 1.8])
     cols[0].write(row['NUM']); cols[1].write(row['NAME'])
-    statuses = []
-    for p in range(1, 9):
-        period = f"الحصة {p}"
-        old = pd.read_sql(f"SELECT status FROM attendance WHERE date='{d}' AND num='{row['NUM']}' AND period='{period}'", conn)
-        idx = 1 if not old.empty and "غايب" in old.iloc[0,0] else 0
-        s = cols[1+p].selectbox(f"p{p}_{row['NUM']}", ["حاضر ✅", "غايب ❌"], index=idx, key=f"{d}_{row['NUM']}_{p}", label_visibility="collapsed")
-        statuses.append((period, s))
 
-    old_j = pd.read_sql(f"SELECT status FROM attendance WHERE date='{d}' AND num='{row['NUM']}' AND period='التبرير'", conn)
+    # 1. الحضور - DEFAULT: حاضر
+    old = pd.read_sql(f"SELECT status FROM attendance WHERE date='{d}' AND num='{row['NUM']}' AND period='اليوم'", conn)
+    idx = 1 if not old.empty and "غايب" in str(old.iloc[0,0]) else 0
+    # L KEY FIHA VER - heik lamma tekbos New/Delete, l key btetsghayyar w Streamlit byensa l 2adim
+    s = cols[2].selectbox(f"p_{row['NUM']}", ["حاضر ✅", "غايب ❌"], index=idx, key=f"V{VER}_{d}_{row['NUM']}_att", label_visibility="collapsed")
+
+    # 2. برر؟ - DEFAULT: لم يبرر
+    old_b = pd.read_sql(f"SELECT status FROM attendance WHERE date='{d}' AND num='{row['NUM']}' AND period='التبرير - برر'", conn)
+    idx_b = 1 if not old_b.empty and "برر ✅" in str(old_b.iloc[0,0]) else 0
+    b = cols[3].selectbox(f"b_{row['NUM']}", ["لم يبرر ❌", "برر ✅"], index=idx_b, key=f"V{VER}_{d}_{row['NUM']}_barar", label_visibility="collapsed")
+
+    # 3. شو التبرير؟
+    old_j = pd.read_sql(f"SELECT status FROM attendance WHERE date='{d}' AND num='{row['NUM']}' AND period='التبرير - شو'", conn)
     old_j_val = old_j.iloc[0,0] if not old_j.empty else ""
-    justification = cols[10].text_input(f"j_{row['NUM']}", value=old_j_val, placeholder="التبرير...", key=f"just_{d}_{row['NUM']}", label_visibility="collapsed")
+    justification = cols[4].text_input(f"j_{row['NUM']}", value=old_j_val, placeholder="مريض، ورقة طبيب...", key=f"V{VER}_{d}_{row['NUM']}_just", label_visibility="collapsed")
 
-    if save_clicked:
-        for period, s in statuses:
-            conn.execute("DELETE FROM attendance WHERE date=? AND num=? AND period=?", (str(d), str(row['NUM']), period))
-            conn.execute("INSERT INTO attendance VALUES (?,?,?,?,?,?)", (str(d), str(row['NUM']), row['NAME'], selected_class, period, s))
-        conn.execute("DELETE FROM attendance WHERE date=? AND num=? AND period='التبرير'", (str(d), str(row['NUM'])))
-        if justification.strip() != "":
-            conn.execute("INSERT INTO attendance VALUES (?,?,?,?,?,?)", (str(d), str(row['NUM']), row['NAME'], selected_class, "التبرير", justification))
-        conn.commit()
+    all_to_save.append((row['NUM'], row['NAME'], s, b, justification))
 
 if save_clicked:
-    st.success("T7afaz - Saved ✅")
+    for num, name, s, b, justification in all_to_save:
+        conn.execute("DELETE FROM attendance WHERE date=? AND num=? AND period='اليوم'", (str(d), str(num)))
+        conn.execute("INSERT INTO attendance VALUES (?,?,?,?,?,?)", (str(d), str(num), str(name), selected_class, "اليوم", s))
+        conn.execute("DELETE FROM attendance WHERE date=? AND num=? AND period='التبرير - برر'", (str(d), str(num)))
+        if "غايب" in s:
+            conn.execute("INSERT INTO attendance VALUES (?,?,?,?,?,?)", (str(d), str(num), str(name), selected_class, "التبرير - برر", b))
+        conn.execute("DELETE FROM attendance WHERE date=? AND num=? AND period='التبرير - شو'", (str(d), str(num)))
+        if justification.strip() != "":
+            conn.execute("INSERT INTO attendance VALUES (?,?,?,?,?,?)", (str(d), str(num), str(name), selected_class, "التبرير - شو", justification))
+    conn.commit()
+    st.success(f"T7afaz - Saved ✅")
     st.rerun()
 
 # --- EXCEL ---
@@ -89,7 +101,8 @@ st.divider()
 df_all = pd.read_sql(f"SELECT date as التاريخ, class as الصف, nom as 'اسم الطالب', period as الحصة, status as الحالة FROM attendance WHERE date='{d}' AND class='{selected_class}'", conn)
 if not df_all.empty:
     pivot = df_all.pivot_table(index=['التاريخ','الصف','اسم الطالب'], columns='الحصة', values='الحالة', aggfunc='first')
-    pivot = pivot.reindex(columns=[f"الحصة {i}" for i in range(1,9)] + ["التبرير"]).reset_index()
+    pivot = pivot.reindex(columns=["اليوم", "التبرير - برر", "التبرير - شو"]).reset_index()
+    pivot.columns = ["التاريخ", "الصف", "اسم الطالب", "الحضور / الغياب", "برر؟", "شو التبرير؟"]
     st.dataframe(pivot, use_container_width=True)
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
