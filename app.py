@@ -33,7 +33,8 @@ page = st.navigation(
         st.Page("exam.py", title="EXAM", icon="🌍"),
         st.Page("stdnote.py", title="STUDENT NOTE", icon="🌍"),
         st.Page("stdnote_view.py", title="VIEW STUDENT NOTE", icon="🌍"),
-         st.Page("attendance.py", title="VIEW ATTENDANCE", icon="🌍"),
+        st.Page("attendance.py", title="VIEW ATTENDANCE", icon="🌍"),
+        st.Page("attendance1.py", title="VIEW ATTENDANCE ALL", icon="🌍"),
         #st.Page("C:/python/ajaltoun/dataframe_demo.py", title="DataFrame", icon="📊"),
     ]
 )
