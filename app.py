@@ -23,10 +23,10 @@ if not st.session_state.logged_in:
 # --- 2. Iza fetna, kammel l app hon, MA FI BOX BA2A ---
 #st.success("Welcome to Ajaltoun LTA 👋")
 # ... hon btebda l logo, l QR, l search, kello
-
+st.logo("ajaltoun.png")
 page = st.navigation(
     [
-         st.Page("hello.py", title="WELCOME TO AJALTOUN LTA", icon="👋" ),
+        st.Page("hello.py", title="WELCOME TO AJALTOUN LTA", icon="👋" ),
         #st.Page("C:/python/ajaltoun/hello.py", title="Hello", icon="👋"),
         #st.Page("C:/python/ajaltoun/hello.py", title="Hello", icon="ajaltoun.png"),
         st.Page("app2.py", title="Ajaltoun Student 🎓", icon="👩‍🎓"),
