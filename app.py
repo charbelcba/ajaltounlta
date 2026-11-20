@@ -26,15 +26,15 @@ if not st.session_state.logged_in:
 
 page = st.navigation(
     [
-         st.Page("hello.py", title="WELCOME TO AJALTOUN LTA" ),
+         st.Page("hello.py", title="WELCOME TO AJALTOUN LTA", icon="👋" ),
         #st.Page("C:/python/ajaltoun/hello.py", title="Hello", icon="👋"),
         #st.Page("C:/python/ajaltoun/hello.py", title="Hello", icon="ajaltoun.png"),
-        st.Page("app2.py", title="Ajaltoun Student", icon="📈"),
-        st.Page("exam.py", title="EXAM", icon="🌍"),
-        st.Page("stdnote.py", title="STUDENT NOTE", icon="🌍"),
-        st.Page("stdnote_view.py", title="VIEW STUDENT NOTE", icon="🌍"),
-        st.Page("attendance.py", title="VIEW ATTENDANCE", icon="🌍"),
-        st.Page("attendanceall.py", title="VIEW ATTENDANCE ALL", icon="🌍"),
+        st.Page("app2.py", title="Ajaltoun Student 🎓", icon="👩‍🎓"),
+        st.Page("exam.py", title="EXAM 📝", icon="✏️"),
+        st.Page("stdnote.py", title="STUDENT NOTE 📒", icon="📖"),
+        st.Page("stdnote_view.py", title="VIEW STUDENT NOTE 👀", icon="🔍"),
+        st.Page("attendance.py", title="VIEW ATTENDANCE 📅", icon="🕐"),
+        st.Page("attendanceall.py", title="VIEW ATTENDANCE ALL 📊", icon="✅"),
         #st.Page("C:/python/ajaltoun/dataframe_demo.py", title="DataFrame", icon="📊"),
     ]
 )
